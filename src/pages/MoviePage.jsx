@@ -11,6 +11,8 @@ export default function MoviePage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [movie, setMovie] = useState(null)
+  const [trailer, setTrailer] = useState(null)
+  const [showTrailer, setShowTrailer] = useState(false)
   const [loading, setLoading] = useState(true)
   
   const containerRef = useRef(null)
@@ -41,7 +43,24 @@ export default function MoviePage() {
       }
     }
 
+    async function fetchVideos() {
+      try {
+        const res = await fetch(`https://api.themoviedb.org/3/movie/${id}/videos?language=en-US`, options)
+        const data = await res.json()
+        console.log('Videos:', data)
+        // Find official trailer first, then any trailer, then any YouTube video
+        const videos = data.results || []
+        const officialTrailer = videos.find(v => v.type === 'Trailer' && v.official && v.site === 'YouTube')
+        const anyTrailer = videos.find(v => v.type === 'Trailer' && v.site === 'YouTube')
+        const anyVideo = videos.find(v => v.site === 'YouTube')
+        setTrailer(officialTrailer || anyTrailer || anyVideo || null)
+      } catch (e) {
+        console.error(e.message)
+      }
+    }
+
     fetchMovie()
+    fetchVideos()
   }, [id])
 
   useGSAP(() => {
@@ -176,16 +195,43 @@ export default function MoviePage() {
             )}
           </div>
 
-          {movie.homepage && (
-            <a href={movie.homepage} target="_blank" rel="noopener noreferrer" className="movie-homepage-link">
-              Visit Official Site
-              <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
-                <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"/>
-              </svg>
-            </a>
-          )}
+          <div className="movie-actions">
+            {trailer && (
+              <button className="trailer-button" onClick={() => setShowTrailer(true)}>
+               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m160-800 80 160h120l-80-160h80l80 160h120l-80-160h80l80 160h120l-80-160h120q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800Zm0 240v320h640v-320H160Zm0 0v320-320Z"/></svg>
+                Watch Trailer
+              </button>
+            )}
+            {movie.homepage && (
+              <a href={movie.homepage} target="_blank" rel="noopener noreferrer" className="movie-homepage-link">
+                Visit Official Site
+                <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
+                  <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"/>
+                </svg>
+              </a>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Trailer Modal */}
+      {showTrailer && trailer && (
+        <div className="trailer-modal" onClick={() => setShowTrailer(false)}>
+          <div className="trailer-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="trailer-close-button" onClick={() => setShowTrailer(false)}>
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
+              </svg>
+            </button>
+            <iframe
+              src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&rel=0`}
+              title={trailer.name}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
