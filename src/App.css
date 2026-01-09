@@ -1,0 +1,148 @@
+h1 {
+  color:white;
+  font-size: 1.5rem;
+}
+.container {
+  max-width: 1200px;
+  margin:0 auto;
+}
+
+.search-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height:50px;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.options-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+select {
+  padding:10px 10px;
+  border-radius: 50px;
+  corner-shape:squircle;
+  background:rgb(34, 34, 34);
+  color:rgb(114, 114, 114);
+  outline: none;
+  border:none;
+}
+
+.input-container {
+  position: relative;
+}
+
+.search-container input {
+  padding:10px 10px;
+  background:rgb(34, 34, 34);
+  outline: none;
+  border:1px solid black;
+  border-radius: 50px;
+  corner-shape:squircle;
+  color:rgb(114, 114, 114);
+  width: 200px;
+  max-width: 100%;
+  transition: width 300ms ease-in-out;
+}
+
+/* .search-container input:focus {
+  width: 300px;
+  max-width: 100%;
+} */
+.search-input-close-btn {
+  position: absolute;
+  height:100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top:0px;
+  right:5px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  outline: none;
+  opacity: 0;
+  animation: fade-in 300ms linear forwards;
+}
+
+@keyframes fade-in {
+  to {
+    opacity: 1;
+  }
+}
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.movie-card {
+  background: #000000;
+  border-radius: 12px;
+  corner-shape:squircle;
+  overflow: hidden;
+  transition: transform 0.2s;
+  position: relative;
+  cursor: pointer;
+  transform: translateZ(0);
+  height:320px;
+}
+
+.thumbs-up {
+  position: absolute;
+  top:15px;
+  right:50px;
+}
+
+.movie-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 400ms ease-in-out;
+}
+
+.movie-card:hover img {
+  transform: scale(1.1);
+}
+
+.movie-card-title {
+  position: absolute;
+  bottom:0px;
+  width: 100%;
+  height:20px;
+  background:rgba(0,0,0,0.2);
+  padding:5px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.movie-card h3 {
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+  color: white;
+}
+
+.movie-card h3 span {
+  font-weight: 400 !important;
+}
+
+/* Skeleton styles */
+.movie-card-skeleton {
+  background: #000000;
+  border-radius: 12px;
+  overflow: hidden;
+}
+

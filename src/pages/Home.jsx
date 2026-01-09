@@ -1,0 +1,114 @@
+import { useState, useEffect } from 'react'
+import MovieCard from '../components/MovieCard'
+import MovieCardSkeleton from '../components/skeletons/MovieCardSkeleton'
+
+export default function Home() {
+  const [movies, setMovies] = useState([])
+  const [popularMovies, setPopularMovies] = useState([])
+  const [movieGenres, setMovieGenres] = useState([])
+  const [selectedGenre, setSelectedGenre] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [searchText, setSearchText] = useState('')
+  
+  const options = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        authorization: `Bearer ${import.meta.env.VITE_TMDB_READ_ACCESS_TOKEN}`
+      }
+    }
+
+  async function popMovies() {
+    try {
+      const res = await fetch('https://api.themoviedb.org/3/movie/popular?language=en-US&page=1', options)
+      const data = await res.json()
+      console.log({popularMovies: data.results})
+      setPopularMovies(data.results)
+    } catch(e) {
+      console.log(e.message)
+    }
+  }
+
+  async function nowPlaying() {
+    try {
+      const res = await fetch('https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=1', options)
+      const data = await res.json()
+      console.log(data)
+      setMovies(data.results)
+    } catch(e) {
+      console.log(e.message)
+    }
+  }
+
+  async function getMovieGenres() {
+    const res = await fetch('https://api.themoviedb.org/3/genre/movie/list', options)
+    const data = await res.json()
+    setMovieGenres(data.genres)
+    console.log('genres: ', data.genres)
+  }
+
+  useEffect(() => {
+    async function getMovies() {
+      try {
+        setLoading(true)
+        await Promise.all([popMovies(), nowPlaying(), getMovieGenres()])
+      } catch(e) {
+        console.error(e.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    getMovies()
+  }, [])
+
+  return (
+    <div className="container">
+      <div className="search-container">
+        <h1>In Theatres Now</h1>
+        <div className='options-container'>
+          <div className="genre-container">
+            <select 
+              value={selectedGenre} 
+              onChange={(e) => setSelectedGenre(e.target.value)}
+            >
+              <option value="" disabled>Movie Genres</option>
+              {movieGenres.map((genre) => (
+                <option key={genre.id} value={genre.id}>
+                  {genre.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="input-container">
+            <input type="text" value={searchText} onChange={e => setSearchText(e.target.value)} placeholder='Search...' />
+            {searchText.length > 0 && <button className='search-input-close-btn' onClick={() => setSearchText('')}>
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="rgb(114,114,114)"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+            </button>}
+          </div>
+        </div>
+      </div>
+      <div className="movies-grid">
+        {loading 
+          ? Array.from({ length: 20 }).map((_, index) => (
+              <MovieCardSkeleton key={index} />
+            ))
+          : movies.map(movie => (
+              <MovieCard movie={movie} key={movie.id} />
+            ))
+        }
+      </div>
+      <div className="search-container"><h1>Popular Films</h1></div>
+      <div className="movies-grid">
+        {loading 
+          ? Array.from({ length: 20 }).map((_, index) => (
+              <MovieCardSkeleton key={index} />
+            ))
+          : popularMovies.map(movie => (
+              <MovieCard movie={movie} key={movie.id} />
+            ))
+        }
+      </div>
+    </div>
+  )
+}
