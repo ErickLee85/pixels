@@ -15,6 +15,7 @@ export default function MoviePage() {
   const [trailer, setTrailer] = useState(null)
   const [reviews, setReviews] = useState([])
   const [similarMovies, setSimilarMovies] = useState([])
+  const [watchProviders, setWatchProviders] = useState(null)
   const [showTrailer, setShowTrailer] = useState(false)
   const [loading, setLoading] = useState(true)
   
@@ -86,10 +87,38 @@ export default function MoviePage() {
       }
     }
 
+    async function fetchWatchProviders() {
+      try {
+        const res = await fetch(`https://api.themoviedb.org/3/movie/${id}/watch/providers`, options)
+        const data = await res.json()
+        console.log('Watch Providers:', data)
+        // Get US providers only and combine all into one unique list
+        const usData = data.results?.US
+        if (usData) {
+          const allProviders = [
+            ...(usData.flatrate || []),
+            ...(usData.rent || []),
+            ...(usData.buy || [])
+          ]
+          // Remove duplicates by provider_id
+          const uniqueProviders = allProviders.filter(
+            (provider, index, self) => 
+              index === self.findIndex(p => p.provider_id === provider.provider_id)
+          )
+          setWatchProviders({ providers: uniqueProviders, link: usData.link })
+        } else {
+          setWatchProviders(null)
+        }
+      } catch (e) {
+        console.error(e.message)
+      }
+    }
+
     fetchMovie()
     fetchVideos()
     fetchReviews()
     fetchSimilarMovies()
+    fetchWatchProviders()
   }, [id])
 
   useGSAP(() => {
@@ -145,6 +174,12 @@ export default function MoviePage() {
       const years = Math.floor(diffDays / 365)
       return `${years} year${years !== 1 ? 's' : ''} ago`
     }
+  }
+
+  function showGenre(genre) {
+        if (genre) {
+                  navigate(`/genre/${genre.id}?name=${encodeURIComponent(genre.name)}`)
+        }
   }
 
   if (loading) {
@@ -215,7 +250,7 @@ export default function MoviePage() {
 
           <div className="movie-genres">
             {movie.genres?.map(genre => (
-              <span key={genre.id} className="genre-tag">{genre.name}</span>
+              <span key={genre.id} className="genre-tag" onClick={() => showGenre(genre)}>{genre.name}</span>
             ))}
           </div>
 
@@ -243,6 +278,30 @@ export default function MoviePage() {
               </div>
             )}
           </div>
+
+          {/* Watch Providers */}
+          {watchProviders && watchProviders.providers?.length > 0 && (
+            <div className="watch-providers">
+              <h3 className="watch-providers-title">Where to Watch</h3>
+              <div className="provider-logos">
+                {watchProviders.providers.map(provider => (
+                  <a 
+                    key={provider.provider_id} 
+                    href={watchProviders.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="provider-logo"
+                    title={provider.provider_name}
+                  >
+                    <img 
+                      src={`${TMDB_IMAGE_BASE_URL}w92${provider.logo_path}`} 
+                      alt={provider.provider_name}
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="movie-actions">
             {trailer && (

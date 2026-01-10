@@ -190,6 +190,47 @@
   transition: all 0.3s ease;
 }
 
+/* Watch Providers */
+.watch-providers {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.watch-providers-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 16px 0;
+}
+
+.provider-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.provider-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.provider-logo:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.provider-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* Movie Actions */
 .movie-actions {
   display: flex;
@@ -623,5 +664,13 @@
   .similar-movies-scroll .movie-card {
     flex: 0 0 150px;
     height: 240px;
+  }
+
+  .watch-providers {
+    text-align: center;
+  }
+
+  .provider-logos {
+    justify-content: center;
   }
 }

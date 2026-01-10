@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import MovieCard from '../components/MovieCard'
 import PersonCard from '../components/PersonCard'
 import MovieCardSkeleton from '../components/skeletons/MovieCardSkeleton'
 
 export default function Home() {
+  const navigate = useNavigate()
   const [movies, setMovies] = useState([])
   const [popularMovies, setPopularMovies] = useState([])
   const [popularPeople, setPopularPeople] = useState([])
@@ -85,7 +87,13 @@ export default function Home() {
           <div className="genre-container">
             <select 
               value={selectedGenre} 
-              onChange={(e) => setSelectedGenre(e.target.value)}
+              onChange={(e) => {
+                const genreId = e.target.value
+                const genre = movieGenres.find(g => g.id.toString() === genreId)
+                if (genre) {
+                  navigate(`/genre/${genreId}?name=${encodeURIComponent(genre.name)}`)
+                }
+              }}
             >
               <option value="" disabled>Movie Genres</option>
               {movieGenres.map((genre) => (
