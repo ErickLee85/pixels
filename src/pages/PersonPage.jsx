@@ -27,6 +27,11 @@ export default function PersonPage() {
     }
   }
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [id])
+
   useEffect(() => {
     async function fetchPerson() {
       try {
@@ -180,7 +185,7 @@ export default function PersonPage() {
 
         {/* Person Info */}
         <div className="person-info" ref={infoRef}>
-          <span className="person-department-tag">{person.known_for_department}</span>
+          {/* <span className="person-department-tag">{person.known_for_department}</span> */}
           <h1 className="person-name-title">{person.name}</h1>
           
           <div className="person-meta">

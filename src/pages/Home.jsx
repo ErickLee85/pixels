@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MovieCard from '../components/MovieCard'
 import PersonCard from '../components/PersonCard'
@@ -6,6 +6,7 @@ import MovieCardSkeleton from '../components/skeletons/MovieCardSkeleton'
 
 export default function Home() {
   const navigate = useNavigate()
+  const popularScrollRef = useRef(null)
   const [movies, setMovies] = useState([])
   const [popularMovies, setPopularMovies] = useState([])
   const [popularPeople, setPopularPeople] = useState([])
@@ -121,18 +122,40 @@ export default function Home() {
             ))
         }
       </div>
-      <div className="search-container"><h1>Popular Films</h1></div>
-      <div className="movies-grid">
-        {loading 
-          ? Array.from({ length: 20 }).map((_, index) => (
-              <MovieCardSkeleton key={index} />
-            ))
-          : popularMovies.map(movie => (
-              <MovieCard movie={movie} key={movie.id} />
-            ))
-        }
+      <div className="section-header"><h1>Popular Films</h1></div>
+      <div className="horizontal-scroll-section">
+        <button 
+          className="scroll-arrow scroll-arrow-left" 
+          onClick={() => popularScrollRef.current?.scrollBy({ left: -600, behavior: 'smooth' })}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+            <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/>
+          </svg>
+        </button>
+        <div className="horizontal-scroll" ref={popularScrollRef}>
+          {loading 
+            ? Array.from({ length: 10 }).map((_, index) => (
+                <div className="horizontal-card" key={index}>
+                  <MovieCardSkeleton />
+                </div>
+              ))
+            : popularMovies.map(movie => (
+                <div className="horizontal-card" key={movie.id}>
+                  <MovieCard movie={movie} />
+                </div>
+              ))
+          }
+        </div>
+        <button 
+          className="scroll-arrow scroll-arrow-right" 
+          onClick={() => popularScrollRef.current?.scrollBy({ left: 600, behavior: 'smooth' })}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+            <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/>
+          </svg>
+        </button>
       </div>
-      <div className="search-container"><h1>Popular People</h1></div>
+      <div className="search-container"><h1>Trending People</h1></div>
       <div className="people-grid">
         {loading 
           ? Array.from({ length: 10 }).map((_, index) => (

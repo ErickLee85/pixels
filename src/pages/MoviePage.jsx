@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 import MovieCard from '../components/MovieCard'
+import MoviePageSkeleton from '../components/skeletons/MoviePageSkeleton'
 
 gsap.registerPlugin(useGSAP)
 
@@ -16,13 +17,16 @@ export default function MoviePage() {
   const [reviews, setReviews] = useState([])
   const [similarMovies, setSimilarMovies] = useState([])
   const [watchProviders, setWatchProviders] = useState(null)
+  const [movieImages, setMovieImages] = useState([])
   const [showTrailer, setShowTrailer] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [backdropLoaded, setBackdropLoaded] = useState(false)
   
   const containerRef = useRef(null)
   const backdropRef = useRef(null)
   const contentRef = useRef(null)
   const posterRef = useRef(null)
+  const similarScrollRef = useRef(null)
 
   const options = {
     method: 'GET',
@@ -31,6 +35,11 @@ export default function MoviePage() {
       authorization: `Bearer ${import.meta.env.VITE_TMDB_READ_ACCESS_TOKEN}`
     }
   }
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [id])
 
   useEffect(() => {
     async function fetchMovie() {
@@ -119,10 +128,35 @@ export default function MoviePage() {
     fetchReviews()
     fetchSimilarMovies()
     fetchWatchProviders()
+    fetchMovieImages()
   }, [id])
 
+  async function fetchMovieImages() {
+    try {
+      const res = await fetch(`https://api.themoviedb.org/3/movie/${id}/images`, options)
+      const data = await res.json()
+      console.log('Movie Images:', data)
+      // Combine backdrops and posters, prioritize backdrops
+      const images = [...(data.backdrops || []), ...(data.posters || [])]
+      setMovieImages(images)
+    } catch (e) {
+      console.error(e.message)
+    }
+  }
+
+  // Preload backdrop image
+  useEffect(() => {
+    if (movie?.backdrop_path) {
+      const img = new Image()
+      img.src = `${TMDB_IMAGE_BASE_URL}original${movie.backdrop_path}`
+      img.onload = () => setBackdropLoaded(true)
+    } else if (movie) {
+      setBackdropLoaded(true)
+    }
+  }, [movie])
+
   useGSAP(() => {
-    if (!loading && movie) {
+    if (!loading && movie && backdropLoaded) {
       const tl = gsap.timeline()
       
       tl.fromTo(backdropRef.current, 
@@ -140,7 +174,7 @@ export default function MoviePage() {
         '-=0.5'
       )
     }
-  }, [loading, movie])
+  }, [loading, movie, backdropLoaded])
 
   function formatRuntime(minutes) {
     const hrs = Math.floor(minutes / 60)
@@ -182,12 +216,8 @@ export default function MoviePage() {
         }
   }
 
-  if (loading) {
-    return (
-      <div className="movie-page-loading">
-        <div className="loading-spinner"></div>
-      </div>
-    )
+  if (loading || !backdropLoaded) {
+    return <MoviePageSkeleton />
   }
 
   if (!movie) {
@@ -215,13 +245,26 @@ export default function MoviePage() {
       </div>
 
       {/* Back Button */}
-      <button className="back-button" onClick={() => navigate('/')}>
+      <button className="back-button" onClick={() => navigate(-1)}>
         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#eaeaeaff"><path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/></svg>
       </button>
 
       {/* Content */}
       <div className="movie-content" ref={contentRef}>
-        <div className="movie-poster" ref={posterRef}>
+        <div 
+          className="movie-poster" 
+          ref={posterRef}
+          onClick={() => movieImages.length > 0 && navigate(`/movie/${id}/images?title=${encodeURIComponent(movie.title)}`)}
+          style={{ cursor: movieImages.length > 0 ? 'pointer' : 'default' }}
+        >
+          {movieImages.length > 0 && (
+            <div className="poster-gallery-hint">
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
+                <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z"/>
+              </svg>
+              <span>{movieImages.length} images</span>
+            </div>
+          )}
           <img 
             src={movie.poster_path 
               ? `${TMDB_IMAGE_BASE_URL}w500${movie.poster_path}` 
@@ -329,10 +372,28 @@ export default function MoviePage() {
             <h2 className="similar-movies-title">
               Similar Movies
             </h2>
-            <div className="similar-movies-scroll">
-              {similarMovies.map(movie => (
-                <MovieCard movie={movie} key={movie.id} />
-              ))}
+            <div className="similar-movies-wrapper">
+              <button 
+                className="scroll-arrow scroll-arrow-left" 
+                onClick={() => similarScrollRef.current?.scrollBy({ left: -600, behavior: 'smooth' })}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                  <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/>
+                </svg>
+              </button>
+              <div className="similar-movies-scroll" ref={similarScrollRef}>
+                {similarMovies.map(movie => (
+                  <MovieCard movie={movie} key={movie.id} />
+                ))}
+              </div>
+              <button 
+                className="scroll-arrow scroll-arrow-right" 
+                onClick={() => similarScrollRef.current?.scrollBy({ left: 600, behavior: 'smooth' })}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                  <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>

@@ -29,10 +29,9 @@ export default function PersonCard({ person }) {
             </div>
             <div className="person-info">
                 <h3 className="person-name">{person.name}</h3>
-                <span className="person-department">{person.known_for_department}</span>
-                {knownForTitle && (
+                {/* {knownForTitle && (
                     <span className="person-known-for">{knownForTitle}</span>
-                )}
+                )} */}
             </div>
         </div>
     )

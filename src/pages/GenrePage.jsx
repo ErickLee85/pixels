@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
@@ -13,11 +13,14 @@ export default function GenrePage() {
   
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   
   const containerRef = useRef(null)
   const gridRef = useRef(null)
+  const sentinelRef = useRef(null)
+  const newMoviesStartIndex = useRef(0)
 
   const options = {
     method: 'GET',
@@ -27,12 +30,20 @@ export default function GenrePage() {
     }
   }
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [id])
+
+  // Initial load
   useEffect(() => {
     async function fetchMoviesByGenre() {
       try {
         setLoading(true)
+        setMovies([])
+        setPage(1)
         const res = await fetch(
-          `https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc&with_genres=${id}`,
+          `https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc&with_genres=${id}`,
           options
         )
         const data = await res.json()
@@ -47,10 +58,53 @@ export default function GenrePage() {
     }
 
     fetchMoviesByGenre()
-  }, [id, page])
+  }, [id])
 
+  // Load more function
+  const loadMoreMovies = useCallback(async () => {
+    if (loadingMore || page >= Math.min(totalPages, 500)) return
+    
+    try {
+      setLoadingMore(true)
+      newMoviesStartIndex.current = movies.length
+      const nextPage = page + 1
+      const res = await fetch(
+        `https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=${nextPage}&sort_by=popularity.desc&with_genres=${id}`,
+        options
+      )
+      const data = await res.json()
+      console.log('More Genre Movies:', data)
+      setMovies(prev => [...prev, ...(data.results || [])])
+      setPage(nextPage)
+    } catch (e) {
+      console.error(e.message)
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [loadingMore, page, totalPages, movies.length, id])
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loading && !loadingMore && page < Math.min(totalPages, 500)) {
+          loadMoreMovies()
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    )
+
+    observer.observe(sentinel)
+
+    return () => observer.disconnect()
+  }, [loading, loadingMore, page, totalPages, loadMoreMovies])
+
+  // Animate initial load
   useGSAP(() => {
-    if (!loading && movies.length > 0) {
+    if (!loading && movies.length > 0 && !loadingMore) {
       gsap.fromTo(gridRef.current?.children || [],
         { opacity: 0, y: 30 },
         { 
@@ -62,7 +116,27 @@ export default function GenrePage() {
         }
       )
     }
-  }, [loading, movies])
+  }, [loading])
+
+  // Animate newly loaded movies
+  useEffect(() => {
+    if (!loadingMore && movies.length > 0 && newMoviesStartIndex.current > 0) {
+      const gridChildren = gridRef.current?.children
+      if (gridChildren) {
+        const newItems = Array.from(gridChildren).slice(newMoviesStartIndex.current)
+        gsap.fromTo(newItems,
+          { opacity: 0, y: 30 },
+          { 
+            opacity: 1, 
+            y: 0, 
+            duration: 0.5, 
+            stagger: 0.05,
+            ease: 'power2.out'
+          }
+        )
+      }
+    }
+  }, [movies.length, loadingMore])
 
   return (
     <div className="genre-page" ref={containerRef}>
@@ -84,32 +158,14 @@ export default function GenrePage() {
               <MovieCard movie={movie} key={movie.id} />
             ))
         }
+        {loadingMore && Array.from({ length: 20 }).map((_, index) => (
+          <MovieCardSkeleton key={`loading-${index}`} />
+        ))}
       </div>
 
-      {!loading && totalPages > 1 && (
-        <div className="pagination">
-          <button 
-            className="pagination-btn"
-            disabled={page === 1}
-            onClick={() => setPage(p => p - 1)}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
-              <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/>
-            </svg>
-            Previous
-          </button>
-          <span className="pagination-info">Page {page} of {Math.min(totalPages, 500)}</span>
-          <button 
-            className="pagination-btn"
-            disabled={page >= Math.min(totalPages, 500)}
-            onClick={() => setPage(p => p + 1)}
-          >
-            Next
-            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
-              <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/>
-            </svg>
-          </button>
-        </div>
+      {/* Sentinel element for infinite scroll */}
+      {!loading && page < Math.min(totalPages, 500) && (
+        <div ref={sentinelRef} className="scroll-sentinel" />
       )}
     </div>
   )

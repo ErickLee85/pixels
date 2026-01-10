@@ -14,10 +14,9 @@ export default function MovieCard({movie}) {
               src={`${TMDB_IMAGE_BASE_URL}${movie.poster_path}`} 
               alt={movie.title}
             />
-            <div className="movie-card-title">
-              {/* <h3>{movie.title}</h3> */}
+            {/* <div className="movie-card-title">
               <h3>Rating: <span>{movie.vote_average.toFixed(1)}</span></h3>
-            </div>
+            </div> */}
           </div>
     )
 }
