@@ -1,0 +1,315 @@
+/* Person Page Styles */
+.person-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0a 0%, #222222 100%);
+  position: relative;
+}
+
+.person-page-loading,
+.person-page-error {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background: #0a0a0a;
+  color: white;
+}
+
+.person-page-error button {
+  padding: 12px 24px;
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 100px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.person-page-error button:hover {
+  transform: scale(1.05);
+}
+
+.person-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 100px 40px 60px;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.person-profile {
+  position: sticky;
+  top: 100px;
+}
+
+.profile-carousel {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.profile-carousel img {
+  width: 100%;
+  display: block;
+  transition: opacity 0.3s ease;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.person-profile:hover .carousel-btn {
+  opacity: 1;
+}
+
+.carousel-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-btn-prev {
+  left: 10px;
+}
+
+.carousel-btn-next {
+  right: 10px;
+}
+
+.carousel-indicators {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  padding: 6px 14px;
+  border-radius: 100px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.person-profile:hover .carousel-indicators {
+  opacity: 1;
+}
+
+.carousel-counter {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.person-profile img {
+  width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.person-profile-placeholder {
+  width: 100%;
+  aspect-ratio: 2/3;
+  background: #1a1a1a;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.person-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.person-department-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  padding: 6px 14px;
+  border-radius: 100px;
+  width: fit-content;
+}
+
+.person-name-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  color: white;
+  line-height: 1.1;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.person-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.person-popularity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #22c55e;
+  font-weight: 500;
+}
+
+.person-biography {
+  margin-top: 16px;
+}
+
+.person-biography h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 12px 0;
+}
+
+.person-biography p {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+  white-space: pre-line;
+}
+
+.person-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.person-aliases {
+  margin-top: 24px;
+}
+
+.person-aliases h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 12px 0;
+}
+
+.aliases-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.alias-tag {
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.imdb-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 12px 24px;
+  background: #F5C518;
+  color: black;
+  text-decoration: none;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  width: fit-content;
+  transition: all 0.3s ease;
+}
+
+.imdb-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(245, 197, 24, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .person-content {
+    grid-template-columns: 1fr;
+    padding: 80px 20px 40px;
+    gap: 32px;
+  }
+
+  .person-profile {
+    position: relative;
+    top: 0;
+    max-width: 200px;
+    margin: 0 auto;
+  }
+
+  .person-profile:hover .carousel-btn,
+  .person-profile:hover .carousel-indicators {
+    opacity: 1;
+  }
+
+  .carousel-btn {
+    opacity: 1;
+    width: 32px;
+    height: 32px;
+  }
+
+  .carousel-indicators {
+    opacity: 1;
+  }
+
+  .person-info {
+    text-align: center;
+    align-items: center;
+  }
+
+  .person-meta {
+    justify-content: center;
+  }
+
+  .person-biography p {
+    text-align: left;
+  }
+
+  .person-details {
+    text-align: center;
+  }
+
+  .person-details .detail-item {
+    align-items: center;
+  }
+
+  .aliases-list {
+    justify-content: center;
+  }
+}

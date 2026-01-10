@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import MovieCard from '../components/MovieCard'
+import PersonCard from '../components/PersonCard'
 import MovieCardSkeleton from '../components/skeletons/MovieCardSkeleton'
 
 export default function Home() {
   const [movies, setMovies] = useState([])
   const [popularMovies, setPopularMovies] = useState([])
+  const [popularPeople, setPopularPeople] = useState([])
   const [movieGenres, setMovieGenres] = useState([])
   const [selectedGenre, setSelectedGenre] = useState('')
   const [loading, setLoading] = useState(false)
@@ -17,6 +19,19 @@ export default function Home() {
         authorization: `Bearer ${import.meta.env.VITE_TMDB_READ_ACCESS_TOKEN}`
       }
     }
+
+  async function popPeople() {
+    try {
+        const res = await fetch('https://api.themoviedb.org/3/person/popular?language=en-US&page=1', options)
+        const data = await res.json();
+        console.log('Popular People: ', {popularPeople: data})
+        setPopularPeople(data.results)
+    } catch(e) {
+        console.error(e.message)
+    } finally {
+
+    }
+  }
 
   async function popMovies() {
     try {
@@ -51,7 +66,7 @@ export default function Home() {
     async function getMovies() {
       try {
         setLoading(true)
-        await Promise.all([popMovies(), nowPlaying(), getMovieGenres()])
+        await Promise.all([popMovies(), nowPlaying(), getMovieGenres(), popPeople()])
       } catch(e) {
         console.error(e.message)
       } finally {
@@ -106,6 +121,17 @@ export default function Home() {
             ))
           : popularMovies.map(movie => (
               <MovieCard movie={movie} key={movie.id} />
+            ))
+        }
+      </div>
+      <div className="search-container"><h1>Popular People</h1></div>
+      <div className="people-grid">
+        {loading 
+          ? Array.from({ length: 10 }).map((_, index) => (
+              <div key={index} className="person-card-skeleton" />
+            ))
+          : popularPeople.map(person => (
+              <PersonCard person={person} key={person.id} />
             ))
         }
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
+import MovieCard from '../components/MovieCard'
 
 gsap.registerPlugin(useGSAP)
 
@@ -12,6 +13,8 @@ export default function MoviePage() {
   const navigate = useNavigate()
   const [movie, setMovie] = useState(null)
   const [trailer, setTrailer] = useState(null)
+  const [reviews, setReviews] = useState([])
+  const [similarMovies, setSimilarMovies] = useState([])
   const [showTrailer, setShowTrailer] = useState(false)
   const [loading, setLoading] = useState(true)
   
@@ -59,8 +62,34 @@ export default function MoviePage() {
       }
     }
 
+    async function fetchReviews() {
+      try {
+        const res = await fetch(`https://api.themoviedb.org/3/movie/${id}/reviews?language=en-US&page=1`, options)
+        const data = await res.json()
+        console.log('Reviews:', data)
+        setReviews(data.results || [])
+      } catch (e) {
+        console.error(e.message)
+      }
+    }
+
+    async function fetchSimilarMovies() {
+      try {
+        const res = await fetch(`https://api.themoviedb.org/3/movie/${id}/similar?language=en-US&page=1`, options)
+        const data = await res.json()
+        console.log('Similar Movies:', data)
+        // Filter out movies without poster and limit to 10
+        const filtered = (data.results || []).filter(m => m.poster_path).slice(0, 10)
+        setSimilarMovies(filtered)
+      } catch (e) {
+        console.error(e.message)
+      }
+    }
+
     fetchMovie()
     fetchVideos()
+    fetchReviews()
+    fetchSimilarMovies()
   }, [id])
 
   useGSAP(() => {
@@ -69,16 +98,16 @@ export default function MoviePage() {
       
       tl.fromTo(backdropRef.current, 
         { opacity: 0, scale: 1.1 },
-        { opacity: 1, scale: 1, duration: 1.2, ease: 'power2.out' }
+        { opacity: 1, scale: 1, duration: 1.2 }
       )
       .fromTo(posterRef.current,
         { opacity: 0, y: 60, scale: 0.9 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: 'back.out(1.7)' },
+        { opacity: 1, y: 0, scale: 1, duration: 0.8 },
         '-=0.8'
       )
       .fromTo('.movie-info > *',
         { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out' },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.1},
         '-=0.5'
       )
     }
@@ -96,6 +125,26 @@ export default function MoviePage() {
       month: 'long',
       day: 'numeric'
     })
+  }
+
+  function formatReviewDate(dateString) {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = Math.abs(now - date)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays < 7) {
+      return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`
+    } else if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7)
+      return `${weeks} week${weeks !== 1 ? 's' : ''} ago`
+    } else if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30)
+      return `${months} month${months !== 1 ? 's' : ''} ago`
+    } else {
+      const years = Math.floor(diffDays / 365)
+      return `${years} year${years !== 1 ? 's' : ''} ago`
+    }
   }
 
   if (loading) {
@@ -213,6 +262,72 @@ export default function MoviePage() {
           </div>
         </div>
       </div>
+
+      {/* Similar Movies Section */}
+      {similarMovies.length > 0 && (
+        <div className="similar-movies-section">
+          <div className="similar-movies-container">
+            <h2 className="similar-movies-title">
+              Similar Movies
+            </h2>
+            <div className="similar-movies-scroll">
+              {similarMovies.map(movie => (
+                <MovieCard movie={movie} key={movie.id} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reviews Section */}
+      {reviews.length > 0 && (
+        <div className="reviews-section">
+          <div className="reviews-container">
+            <h2 className="reviews-title">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                <path d="M240-400h480v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"/>
+              </svg>
+              Reviews ({reviews.length})
+            </h2>
+            <div className="reviews-list">
+              {reviews.slice(0, 5).map(review => (
+                <div key={review.id} className="review-card">
+                  <div className="review-header">
+                    <div className="review-author-avatar">
+                      {review.author_details?.avatar_path ? (
+                        <img 
+                          src={review.author_details.avatar_path.startsWith('/http') 
+                            ? review.author_details.avatar_path.slice(1) 
+                            : `${TMDB_IMAGE_BASE_URL}w45${review.author_details.avatar_path}`
+                          } 
+                          alt={review.author}
+                        />
+                      ) : (
+                        <div className="avatar-placeholder">
+                          {review.author?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="review-author-info">
+                      <span className="review-author-name">{review.author}</span>
+                      <span className="review-date">{formatReviewDate(review.created_at)}</span>
+                    </div>
+                    {review.author_details?.rating && (
+                      <div className="review-rating">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="#fbbf24">
+                          <path d="m233-120 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z"/>
+                        </svg>
+                        {review.author_details.rating}/10
+                      </div>
+                    )}
+                  </div>
+                  <p className="review-content">{review.content}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Trailer Modal */}
       {showTrailer && trailer && (
