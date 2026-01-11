@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
+import MovieCard from '../components/MovieCard'
 
 gsap.registerPlugin(useGSAP)
 
@@ -12,6 +13,8 @@ export default function PersonPage() {
   const navigate = useNavigate()
   const [person, setPerson] = useState(null)
   const [images, setImages] = useState([])
+  const [movieCredits, setMovieCredits] = useState([])
+  const [tvCredits, setTvCredits] = useState([])
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   
@@ -58,8 +61,40 @@ export default function PersonPage() {
       }
     }
 
+    async function fetchMovieCredits() {
+      try {
+        const res = await fetch(`https://api.themoviedb.org/3/person/${id}/movie_credits`, options)
+        const data = await res.json()
+        console.log('Movie Credits:', data)
+        // Sort by popularity and filter out movies without posters
+        const sortedCast = (data.cast || [])
+          .filter(movie => movie.poster_path)
+          .sort((a, b) => b.popularity - a.popularity)
+        setMovieCredits(sortedCast)
+      } catch (e) {
+        console.error(e.message)
+      }
+    }
+
+    async function fetchTvCredits() {
+      try {
+        const res = await fetch(`https://api.themoviedb.org/3/person/${id}/tv_credits`, options)
+        const data = await res.json()
+        console.log('TV Credits:', data)
+        // Sort by popularity and filter out shows without posters
+        const sortedCast = (data.cast || [])
+          .filter(show => show.poster_path)
+          .sort((a, b) => b.popularity - a.popularity)
+        setTvCredits(sortedCast)
+      } catch (e) {
+        console.error(e.message)
+      }
+    }
+
     fetchPerson()
     fetchImages()
+    fetchMovieCredits()
+    fetchTvCredits()
   }, [id])
 
   useGSAP(() => {
@@ -269,6 +304,57 @@ export default function PersonPage() {
           )}
         </div>
       </div>
+
+      {/* Movie Credits Section */}
+      {movieCredits.length > 0 && (
+        <div className="person-filmography">
+          <div className="filmography-header">
+            <h2>Filmography</h2>
+            <span className="filmography-count">{movieCredits.length} films</span>
+          </div>
+          <div className="filmography-grid">
+            {movieCredits.slice(0, 20).map(movie => (
+              <div className="filmography-item" key={movie.credit_id}>
+                <MovieCard movie={movie} />
+                {movie.character && (
+                  <p className="character-name">as {movie.character}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TV Credits Section */}
+      {tvCredits.length > 0 && (
+        <div className="person-filmography person-tv-credits">
+          <div className="filmography-header">
+            <h2>Television</h2>
+            <span className="filmography-count">{tvCredits.length} shows</span>
+          </div>
+          <div className="filmography-grid">
+            {tvCredits.slice(0, 20).map(show => (
+              <div className="filmography-item" key={show.credit_id}>
+                <div className="tv-card" onClick={() => window.open(`https://www.themoviedb.org/tv/${show.id}`, '_blank')}>
+                  <img 
+                    src={`${TMDB_IMAGE_BASE_URL}w500${show.poster_path}`} 
+                    alt={show.name}
+                  />
+                  <div className="tv-card-info">
+                    <h3>{show.name}</h3>
+                    {show.episode_count > 0 && (
+                      <span className="episode-count">{show.episode_count} episode{show.episode_count !== 1 ? 's' : ''}</span>
+                    )}
+                  </div>
+                </div>
+                {show.character && (
+                  <p className="character-name">as {show.character}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
