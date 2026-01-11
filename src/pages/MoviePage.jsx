@@ -291,6 +291,31 @@ export default function MoviePage() {
 
           <p className="movie-overview">{movie.overview}</p>
 
+          {/* Collection Link */}
+          {movie.belongs_to_collection && (
+            <div 
+              className="movie-collection-link"
+              onClick={() => navigate(`/collection/${movie.belongs_to_collection.id}`)}
+            >
+              {movie.belongs_to_collection.backdrop_path && (
+                <img 
+                  src={`${TMDB_IMAGE_BASE_URL}w780${movie.belongs_to_collection.backdrop_path}`}
+                  alt={movie.belongs_to_collection.name}
+                  className="collection-backdrop-preview"
+                />
+              )}
+              <div className="collection-link-content">
+                <span className="collection-link-label">Part of</span>
+                <span className="collection-link-name">{movie.belongs_to_collection.name}</span>
+                <span className="collection-link-arrow">
+                  <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
+                    <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="movie-details">
             <div className="detail-item">
               <span className="detail-label">Release Date</span>

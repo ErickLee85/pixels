@@ -4,12 +4,14 @@ import MoviePage from './pages/MoviePage'
 import PersonPage from './pages/PersonPage'
 import GenrePage from './pages/GenrePage'
 import MovieImagesPage from './pages/MovieImagesPage'
+import CollectionPage from './pages/CollectionPage'
 import Navigation from './components/Navigation'
 import './App.css'
 import './pages/MoviePage.css'
 import './pages/PersonPage.css'
 import './pages/GenrePage.css'
 import './pages/MovieImagesPage.css'
+import './pages/CollectionPage.css'
 
 function App() {
   return (
@@ -21,6 +23,7 @@ function App() {
         <Route path="/movie/:id/images" element={<MovieImagesPage />} />
         <Route path="/person/:id" element={<PersonPage />} />
         <Route path="/genre/:id" element={<GenrePage />} />
+        <Route path="/collection/:id" element={<CollectionPage />} />
       </Routes>
     </>
   )
