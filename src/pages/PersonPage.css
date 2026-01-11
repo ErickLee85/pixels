@@ -3,6 +3,7 @@
   min-height: 100vh;
   background: black;
   position: relative;
+  padding-top: 70px;
 }
 
 .person-page-loading,

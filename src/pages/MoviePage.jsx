@@ -18,7 +18,6 @@ export default function MoviePage() {
   const [similarMovies, setSimilarMovies] = useState([])
   const [watchProviders, setWatchProviders] = useState(null)
   const [movieImages, setMovieImages] = useState([])
-  const [showTrailer, setShowTrailer] = useState(false)
   const [loading, setLoading] = useState(true)
   const [backdropLoaded, setBackdropLoaded] = useState(false)
   
@@ -257,14 +256,7 @@ export default function MoviePage() {
           onClick={() => movieImages.length > 0 && navigate(`/movie/${id}/images?title=${encodeURIComponent(movie.title)}`)}
           style={{ cursor: movieImages.length > 0 ? 'pointer' : 'default' }}
         >
-          {movieImages.length > 0 && (
-            <div className="poster-gallery-hint">
-              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
-                <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z"/>
-              </svg>
-              <span>{movieImages.length} images</span>
-            </div>
-          )}
+  
           <img 
             src={movie.poster_path 
               ? `${TMDB_IMAGE_BASE_URL}w500${movie.poster_path}` 
@@ -346,24 +338,32 @@ export default function MoviePage() {
             </div>
           )}
 
-          <div className="movie-actions">
-            {trailer && (
-              <button className="trailer-button" onClick={() => setShowTrailer(true)}>
-               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m160-800 80 160h120l-80-160h80l80 160h120l-80-160h80l80 160h120l-80-160h120q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800Zm0 240v320h640v-320H160Zm0 0v320-320Z"/></svg>
-                Watch Trailer
-              </button>
-            )}
-            {movie.homepage && (
+          {/* {movie.homepage && (
+            <div className="movie-actions">
               <a href={movie.homepage} target="_blank" rel="noopener noreferrer" className="movie-homepage-link">
                 Visit Official Site
                 <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
                   <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"/>
                 </svg>
               </a>
-            )}
-          </div>
+            </div>
+          )} */}
         </div>
       </div>
+
+      {/* Inline Trailer - Full Width */}
+      {trailer && (
+        <div className="movie-trailer-section">
+          <div className="movie-trailer-inline">
+            <iframe
+              src={`https://www.youtube.com/embed/${trailer.key}?rel=0`}
+              title={trailer.name}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      )}
 
       {/* Similar Movies Section */}
       {similarMovies.length > 0 && (
@@ -449,24 +449,6 @@ export default function MoviePage() {
         </div>
       )}
 
-      {/* Trailer Modal */}
-      {showTrailer && trailer && (
-        <div className="trailer-modal" onClick={() => setShowTrailer(false)}>
-          <div className="trailer-modal-content" onClick={e => e.stopPropagation()}>
-            <button className="trailer-close-button" onClick={() => setShowTrailer(false)}>
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
-                <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
-              </svg>
-            </button>
-            <iframe
-              src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&rel=0`}
-              title={trailer.name}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        </div>
-      )}
     </div>
   )
 }

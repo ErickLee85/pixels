@@ -2,9 +2,128 @@ h1 {
   color:white;
   font-size: 1.5rem;
 }
+
+/* Navigation */
+.navigation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: transparent;
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  transition: color 0.2s ease;
+}
+
+.nav-logo svg {
+  color: #e50914;
+}
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+
+.nav-search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav-search-container .search-icon {
+  position: absolute;
+  left: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+.nav-search-container input {
+  padding: 0.6rem 2.5rem;
+  border-radius: 50px;
+  corner-shape:squircle;
+  background:rgb(34, 34, 34);
+  color:rgb(114, 114, 114);
+  outline: none;
+  border:none;
+  width: 200px;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.nav-search-container input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-search-clear {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.nav-search-clear:hover {
+  color: white;
+}
+
+/* Responsive Navigation */
+@media (max-width: 640px) {
+  .nav-content {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .nav-logo span {
+    display: none;
+  }
+
+  .nav-search-container input {
+    width: 140px;
+  }
+
+  .nav-search-container input:focus {
+    width: 180px;
+  }
+
+  .nav-genre-container select {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
 .container {
   max-width: 1200px;
-  margin:0 auto;
+  margin: 0 auto;
+  padding-top: 70px;
 }
 
 /* Featured Hero Section */
@@ -94,10 +213,6 @@ h1 {
   transition: color 0.2s ease;
 }
 
-.featured-title:hover {
-  color: #e50914;
-}
-
 .featured-meta {
   display: flex;
   align-items: center;
@@ -144,12 +259,6 @@ h1 {
   transition: all 0.3s ease;
   width: fit-content;
   margin-top: 0.5rem;
-}
-
-.featured-details-btn:hover {
-  background: #e50914;
-  color: white;
-  transform: translateX(5px);
 }
 
 .featured-trailer {
