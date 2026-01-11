@@ -410,7 +410,7 @@ export default function MoviePage() {
               Reviews ({reviews.length})
             </h2>
             <div className="reviews-list">
-              {reviews.slice(0, 5).map(review => (
+              {reviews.map(review => (
                 <div key={review.id} className="review-card">
                   <div className="review-header">
                     <div className="review-author-avatar">

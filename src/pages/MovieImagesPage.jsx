@@ -34,9 +34,13 @@ export default function MovieImagesPage() {
         setLoading(true)
         const res = await fetch(`https://api.themoviedb.org/3/movie/${id}/images`, options)
         const data = await res.json()
-        console.log('Movie Images:', data)
-        // Combine backdrops and posters
-        const allImages = [...(data.backdrops || []), ...(data.posters || [])]
+
+        // Filter all images for US only
+        const usBackdrops = (data.backdrops || []).filter((item) => item.iso_3166_1 === 'US')
+        const usLogos = (data.logos || []).filter((item) => item.iso_3166_1 === 'US')
+        const usPosters = (data.posters || []).filter((item) => item.iso_3166_1 === 'US')
+        const allImages = [...usBackdrops, ...usLogos, ...usPosters]
+        console.log('Movie Images...:', { backdrops: usBackdrops, logos: usLogos, posters: usPosters })
         setImages(allImages)
       } catch (e) {
         console.error(e.message)
