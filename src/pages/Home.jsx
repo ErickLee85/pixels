@@ -9,9 +9,11 @@ const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/'
 export default function Home() {
   const navigate = useNavigate()
   const popularScrollRef = useRef(null)
+  const tvScrollRef = useRef(null)
   const [movies, setMovies] = useState([])
   const [popularMovies, setPopularMovies] = useState([])
   const [popularPeople, setPopularPeople] = useState([])
+  const [trendingTV, setTrendingTV] = useState([])
   const [loading, setLoading] = useState(false)
   const [featuredMovie, setFeaturedMovie] = useState(null)
   const [featuredTrailer, setFeaturedTrailer] = useState(null)
@@ -45,6 +47,17 @@ export default function Home() {
       setPopularMovies(data.results)
     } catch(e) {
       console.log(e.message)
+    }
+  }
+
+  async function fetchTrendingTV() {
+    try {
+      const res = await fetch('https://api.themoviedb.org/3/trending/tv/day?language=en-US', options)
+      const data = await res.json()
+      console.log('Trending TV:', data)
+      setTrendingTV(data.results)
+    } catch(e) {
+      console.error(e.message)
     }
   }
 
@@ -88,7 +101,7 @@ export default function Home() {
     async function getMovies() {
       try {
         setLoading(true)
-        await Promise.all([popMovies(), nowPlaying(), popPeople()])
+        await Promise.all([popMovies(), nowPlaying(), popPeople(), fetchTrendingTV()])
       } catch(e) {
         console.error(e.message)
       } finally {
@@ -163,7 +176,7 @@ export default function Home() {
 
       {/* In Theatres Section */}
       <section className="content-section">
-        <div className="section-header-fancy">
+        <div className="section-header-fancy" style={{borderBottom:'1px solid rgba(146, 38, 38, 1)'}}>
           <div className="section-title-group">
             <span className="section-icon">
               <svg xmlns="http://www.w3.org/2000/svg" height="36px" viewBox="0 -960 960 960" width="36px" fill="currentColor"><path d="M200-320h400L462-500l-92 120-62-80-108 140Zm-40 160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h480q33 0 56.5 23.5T720-720v180l160-160v440L720-420v180q0 33-23.5 56.5T640-160H160Zm0-80h480v-480H160v480Zm0 0v-480 480Z"/></svg>
@@ -191,7 +204,7 @@ export default function Home() {
 
       {/* Popular Films Section */}
       <section className="content-section popular-section">
-        <div className="section-header-fancy">
+        <div className="section-header-fancy" style={{borderBottom:'1px solid #9b7925ff'}}>
           <div className="section-title-group">
             <span className="section-icon trending">
               <svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="currentColor">
@@ -199,7 +212,7 @@ export default function Home() {
               </svg>
             </span>
             <div>
-              <h2 className="section-title">Trending Now</h2>
+              <h2 className="section-title">Trending Movies</h2>
               <p className="section-subtitle">Most popular films this week</p>
             </div>
           </div>
@@ -239,6 +252,83 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Trending TV Shows Section */}
+      <section className="content-section tv-section">
+        <div className="section-header-fancy" style={{borderBottom:'1px solid #9b7925ff'}}>
+          <div className="section-title-group">
+            <span className="section-icon tv">
+              <svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="currentColor">
+                <path d="M320-120v-80h80v-80H160q-33 0-56.5-23.5T80-360v-400q0-33 23.5-56.5T160-840h640q33 0 56.5 23.5T880-760v400q0 33-23.5 56.5T800-280H560v80h80v80H320ZM160-360h640v-400H160v400Zm0 0v-400 400Z"/>
+              </svg>
+            </span>
+            <div>
+              <h2 className="section-title">Trending TV Shows</h2>
+              <p className="section-subtitle">Binge-worthy series everyone's watching</p>
+            </div>
+          </div>
+        </div>
+        <div className="horizontal-scroll-modern">
+          <button 
+            className="scroll-btn scroll-btn-left" 
+            onClick={() => tvScrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+              <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/>
+            </svg>
+          </button>
+          <div className="horizontal-scroll-track" ref={tvScrollRef}>
+            {loading 
+              ? Array.from({ length: 8 }).map((_, index) => (
+                  <div className="scroll-card" key={index}>
+                    <MovieCardSkeleton />
+                  </div>
+                ))
+              : trendingTV.map((show, index) => (
+                  <div className="scroll-card" key={show.id} onClick={() => navigate(`/tv/${show.id}`)}>
+                    <span className="rank-badge">{index + 1}</span>
+                    <div className="tv-scroll-card">
+                      <div className="tv-scroll-poster">
+                        {show.poster_path ? (
+                          <img 
+                            src={`${TMDB_IMAGE_BASE_URL}w342${show.poster_path}`}
+                            alt={show.name}
+                          />
+                        ) : (
+                          <div className="tv-scroll-placeholder">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 -960 960 960" width="48px" fill="rgba(255,255,255,0.2)">
+                              <path d="M320-120v-80h80v-80H160q-33 0-56.5-23.5T80-360v-400q0-33 23.5-56.5T160-840h640q33 0 56.5 23.5T880-760v400q0 33-23.5 56.5T800-280H560v80h80v80H320Z"/>
+                            </svg>
+                          </div>
+                        )}
+                        <div className="tv-scroll-rating">
+                          <svg xmlns="http://www.w3.org/2000/svg" height="12px" viewBox="0 -960 960 960" width="12px" fill="#fbbf24">
+                            <path d="m233-120 65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Z"/>
+                          </svg>
+                          {show.vote_average?.toFixed(1)}
+                        </div>
+                      </div>
+                      {/* <div className="tv-scroll-info">
+                        <h3 className="tv-scroll-title">{show.name}</h3>
+                        <span className="tv-scroll-year">
+                          {show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'TBA'}
+                        </span>
+                      </div> */}
+                    </div>
+                  </div>
+                ))
+            }
+          </div>
+          <button 
+            className="scroll-btn scroll-btn-right" 
+            onClick={() => tvScrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+              <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
       {/* Trending People Section */}
       <section className="content-section people-section">
         <div className="section-header-fancy">
@@ -259,7 +349,7 @@ export default function Home() {
             ? Array.from({ length: 10 }).map((_, index) => (
                 <div key={index} className="person-card-skeleton" />
               ))
-            : popularPeople.slice(0, 10).map((person) => (
+            : popularPeople.map((person) => (
                 <PersonCard person={person} key={person.id} />
               ))
           }

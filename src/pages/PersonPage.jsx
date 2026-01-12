@@ -335,7 +335,7 @@ export default function PersonPage() {
           <div className="filmography-grid">
             {tvCredits.slice(0, 20).map(show => (
               <div className="filmography-item" key={show.credit_id}>
-                <div className="tv-card" onClick={() => window.open(`https://www.themoviedb.org/tv/${show.id}`, '_blank')}>
+                <div className="tv-card" onClick={() => navigate(`/tv/${show.id}`)}>
                   <img 
                     src={`${TMDB_IMAGE_BASE_URL}w500${show.poster_path}`} 
                     alt={show.name}
