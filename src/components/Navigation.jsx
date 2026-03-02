@@ -32,7 +32,7 @@ export default function Navigation() {
     <nav className="navigation">
       <div className="nav-content">
         <Link to="/" className="nav-logo">
-          <span>Vicarious</span>
+          <span>Pixels</span>
         </Link>
 
         <div className="nav-controls">
